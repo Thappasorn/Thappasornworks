@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "home": "Home",
+    "graphics": "Graphics",
+    "shorts": "Shot Videos",
+    "longs": "Long Form Video",
+    "photo": "Filming / Photography",
+    "contact": "Contact"
+  },
+  "hero": {
+    "roles": "Creative Director • Graphic Designer • Video Editor • Content Creator",
+    "l1": "Stories,",
+    "l2": "crafted",
+    "l3": "frame by frame.",
+    "lead": "A multidisciplinary creative working across graphic design, short-form video, long-form film, photography and videography — building work that feels effortless and lands precisely.",
+    "cta1": "View My Work",
+    "cta2": "Contact Me"
+  },
+  "stats": {
+    "projects": "Projects Delivered",
+    "clients": "Happy Clients",
+    "countries": "Countries Served",
+    "years": "Years of Experience"
+  },
+  "sections": {
+    "featured": "Selected Work",
+    "featuredH": "A few favourites from the cutting room.",
+    "seeAll": "See All",
+    "reviews": "Client Reviews",
+    "reviewsH": "What clients say about working with THAPPASORN WORKS.",
+    "trusted": "Trusted By",
+    "trustedH": "Brands & clients I have created for.",
+    "based": "Based on",
+    "reviewsCount": "Client Reviews"
+  },
+  "cat": {
+    "search": "Search projects, clients, categories…",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "all": "All",
+    "none": "No results found"
+  },
+  "project": {
+    "client": "Client",
+    "year": "Year",
+    "services": "Services",
+    "challenge": "The Challenge",
+    "solution": "The Solution",
+    "results": "The Results",
+    "gallery": "Gallery",
+    "related": "Related Projects",
+    "share": "Share",
+    "back": "Back"
+  },
+  "contact": {
+    "eyebrow": "Let's Make Something",
+    "h": "Have a project in mind?",
+    "lead": "Tell me what you're building. I reply to every serious enquiry within 48 hours.",
+    "name": "Name",
+    "email": "Email",
+    "type": "Project type",
+    "message": "Tell me about it",
+    "send": "Send enquiry",
+    "phone": "Phone",
+    "studio": "Studio",
+    "studioVal": "Bangkok • Available worldwide",
+    "lineId": "LINE ID",
+    "scan": "Scan QR Code to add LINE",
+    "addLine": "Add Me on LINE"
+  },
+  "admin": {
+    "login": "Owner Access",
+    "loginSub": "Single-admin control panel. No public registration.",
+    "username": "Email",
+    "password": "Password",
+    "signin": "Sign in securely",
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "reviews": "Reviews",
+    "logos": "Logos",
+    "analytics": "Analytics",
+    "logout": "Sign out",
+    "visitors": "Total Visitors",
+    "views": "Project Views",
+    "lineClicks": "LINE Clicks",
+    "emailClicks": "Email Clicks",
+    "phoneClicks": "Phone Clicks",
+    "topProjects": "Most Viewed Projects",
+    "backup": "Backup",
+    "lastBackup": "Last Backup",
+    "noBackup": "No export yet",
+    "exportDb": "Export Full Database",
+    "exportProjects": "Export Projects",
+    "exportReviews": "Export Reviews",
+    "exportTrusted": "Export Trusted-By Logos"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "graphics": "グラフィック",
+    "shorts": "ショート動画",
+    "longs": "長編動画",
+    "photo": "撮影 / 写真",
+    "contact": "お問い合わせ"
+  },
+  "hero": {
+    "roles": "クリエイティブディレクター • グラフィックデザイナー • 動画編集 • コンテンツクリエイター",
+    "l1": "物語を、",
+    "l2": "丁寧に",
+    "l3": "一コマずつ。",
+    "lead": "グラフィック、ショート動画、長編映像、写真、映像制作までを横断するクリエイター。さりげなくも的確に響く作品をつくります。",
+    "cta1": "作品を見る",
+    "cta2": "お問い合わせ"
+  },
+  "stats": {
+    "projects": "納品実績",
+    "clients": "満足いただいた顧客",
+    "countries": "対応国数",
+    "years": "経験年数"
+  },
+  "sections": {
+    "featured": "セレクト作品",
+    "featuredH": "編集室からのお気に入り。",
+    "seeAll": "すべて見る",
+    "reviews": "お客様の声",
+    "reviewsH": "THAPPASORN WORKS と仕事をしたお客様の声。",
+    "trusted": "信頼の実績",
+    "trustedH": "これまでに携わったブランドとクライアント。",
+    "based": "件数",
+    "reviewsCount": "件のお客様の声"
+  },
+  "cat": {
+    "search": "プロジェクト・クライアント・カテゴリーを検索…",
+    "newest": "新しい順",
+    "oldest": "古い順",
+    "all": "すべて",
+    "none": "結果が見つかりません"
+  },
+  "project": {
+    "client": "クライアント",
+    "year": "年",
+    "services": "サービス",
+    "challenge": "課題",
+    "solution": "解決策",
+    "results": "成果",
+    "gallery": "ギャラリー",
+    "related": "関連プロジェクト",
+    "share": "シェア",
+    "back": "戻る"
+  },
+  "contact": {
+    "eyebrow": "一緒につくりましょう",
+    "h": "プロジェクトのご相談は?",
+    "lead": "つくりたいものをお聞かせください。本気のご相談には48時間以内に必ず返信します。",
+    "name": "お名前",
+    "email": "メール",
+    "type": "案件タイプ",
+    "message": "内容を教えてください",
+    "send": "問い合わせを送信",
+    "phone": "電話",
+    "studio": "スタジオ",
+    "studioVal": "バンコク • 世界中対応",
+    "lineId": "LINE ID",
+    "scan": "QRコードをスキャンしてLINE追加",
+    "addLine": "LINEで追加"
+  },
+  "admin": {
+    "login": "オーナーログイン",
+    "loginSub": "単一管理者用パネル。一般登録はありません。",
+    "username": "メール",
+    "password": "パスワード",
+    "signin": "安全にログイン",
+    "dashboard": "ダッシュボード",
+    "projects": "プロジェクト",
+    "reviews": "レビュー",
+    "logos": "ロゴ",
+    "analytics": "分析",
+    "logout": "ログアウト",
+    "visitors": "総訪問数",
+    "views": "プロジェクト閲覧",
+    "lineClicks": "LINEクリック",
+    "emailClicks": "メールクリック",
+    "phoneClicks": "電話クリック",
+    "topProjects": "最も閲覧されたプロジェクト",
+    "backup": "バックアップ",
+    "lastBackup": "最終バックアップ",
+    "noBackup": "未エクスポート",
+    "exportDb": "データベース全体をエクスポート",
+    "exportProjects": "プロジェクトをエクスポート",
+    "exportReviews": "レビューをエクスポート",
+    "exportTrusted": "ロゴをエクスポート"
+  }
+}

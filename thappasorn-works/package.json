@@ -1,0 +1,35 @@
+{
+  "name": "thappasorn-works",
+  "version": "2.0.0",
+  "private": true,
+  "description": "THAPPASORN WORKS \u2014 production creative portfolio platform",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "backup:db": "tsx scripts/backup-db.ts",
+    "export:projects": "tsx scripts/export-projects.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.4",
+    "cloudinary": "^2.5.1",
+    "framer-motion": "^11.11.9",
+    "next": "^15.1.6",
+    "next-intl": "^3.25.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3",
+    "tsx": "^4.19.2"
+  }
+}

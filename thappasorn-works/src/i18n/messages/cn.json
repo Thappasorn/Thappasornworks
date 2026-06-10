@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "home": "首页",
+    "graphics": "平面设计",
+    "shorts": "短视频",
+    "longs": "长视频",
+    "photo": "拍摄 / 摄影",
+    "contact": "联系"
+  },
+  "hero": {
+    "roles": "创意总监 • 平面设计师 • 视频剪辑师 • 内容创作者",
+    "l1": "用故事,",
+    "l2": "精心",
+    "l3": "逐帧打造。",
+    "lead": "跨领域创意人,涉足平面设计、短视频、长视频、摄影与影像制作 — 打造看似轻松却精准到位的作品。",
+    "cta1": "查看作品",
+    "cta2": "联系我"
+  },
+  "stats": {
+    "projects": "已交付项目",
+    "clients": "满意客户",
+    "countries": "服务国家",
+    "years": "从业年限"
+  },
+  "sections": {
+    "featured": "精选作品",
+    "featuredH": "剪辑室里的几件心头好。",
+    "seeAll": "查看全部",
+    "reviews": "客户评价",
+    "reviewsH": "客户对与 THAPPASORN WORKS 合作的评价。",
+    "trusted": "信赖之选",
+    "trustedH": "曾合作的品牌与客户。",
+    "based": "基于",
+    "reviewsCount": "条客户评价"
+  },
+  "cat": {
+    "search": "搜索项目、客户、分类…",
+    "newest": "最新",
+    "oldest": "最早",
+    "all": "全部",
+    "none": "未找到结果"
+  },
+  "project": {
+    "client": "客户",
+    "year": "年份",
+    "services": "服务",
+    "challenge": "挑战",
+    "solution": "解决方案",
+    "results": "成果",
+    "gallery": "图库",
+    "related": "相关项目",
+    "share": "分享",
+    "back": "返回"
+  },
+  "contact": {
+    "eyebrow": "一起创作",
+    "h": "有项目想法吗?",
+    "lead": "告诉我你想打造什么。每一条认真的咨询我都会在 48 小时内回复。",
+    "name": "姓名",
+    "email": "邮箱",
+    "type": "项目类型",
+    "message": "项目说明",
+    "send": "发送咨询",
+    "phone": "电话",
+    "studio": "工作室",
+    "studioVal": "曼谷 • 全球接单",
+    "lineId": "LINE ID",
+    "scan": "扫描二维码添加 LINE",
+    "addLine": "在 LINE 上加我"
+  },
+  "admin": {
+    "login": "所有者登录",
+    "loginSub": "单一管理员控制面板。无公开注册。",
+    "username": "邮箱",
+    "password": "密码",
+    "signin": "安全登录",
+    "dashboard": "仪表板",
+    "projects": "项目",
+    "reviews": "评价",
+    "logos": "标志",
+    "analytics": "分析",
+    "logout": "退出登录",
+    "visitors": "访客总数",
+    "views": "项目浏览",
+    "lineClicks": "LINE 点击",
+    "emailClicks": "邮箱点击",
+    "phoneClicks": "电话点击",
+    "topProjects": "最受欢迎项目",
+    "backup": "备份",
+    "lastBackup": "上次备份",
+    "noBackup": "尚未导出",
+    "exportDb": "导出完整数据库",
+    "exportProjects": "导出项目",
+    "exportReviews": "导出评价",
+    "exportTrusted": "导出合作标志"
+  }
+}
