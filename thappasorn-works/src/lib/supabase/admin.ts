@@ -1,13 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
 
 /**
- * Service-role client — SERVER ONLY. Bypasses RLS so the authenticated owner
- * can write content reliably regardless of cookie/session propagation.
- * Never import this into a client component. The key is read from a
- * server-only env var (no NEXT_PUBLIC prefix), so it is never sent to the browser.
+ * Service-role / secret client — SERVER ONLY. Bypasses RLS so the verified
+ * owner can write content reliably. Works with the new Supabase secret key
+ * (sb_secret_...) or a legacy service_role JWT. Never import into client code.
  */
 export function createAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  return createClient(url, serviceKey, { auth: { persistSession: false } });
+  const secret =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SECRET_KEY ||
+    "";
+  return createClient(url, secret, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
