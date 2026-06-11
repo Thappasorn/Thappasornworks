@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import LanguageSwitcher from "./LanguageSwitcher";
+import ThemeToggle from "./ThemeToggle";
 
 const LINKS = [
   { href: "/", key: "home" },
@@ -42,6 +43,7 @@ export default function Nav() {
       </div>
 
       <div className="flex items-center gap-2.5">
+        <ThemeToggle />
         <div className="hidden md:block"><LanguageSwitcher /></div>
         <button onClick={() => setOpen((o) => !o)} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 md:hidden" aria-label="Menu">
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}><path d="M4 7h16M4 12h16M4 17h16" /></svg>
@@ -56,7 +58,7 @@ export default function Nav() {
         {LINKS.map((l) => (
           <Link key={l.key} href={l.href} className="h-display text-3xl text-ink hover:text-accent">{t(l.key)}</Link>
         ))}
-        <div className="mt-6 scale-125"><LanguageSwitcher /></div>
+        <div className="mt-6 flex items-center gap-4"><LanguageSwitcher /><ThemeToggle /></div>
       </div>
     </nav>
   );

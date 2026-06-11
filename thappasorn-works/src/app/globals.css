@@ -7,6 +7,18 @@
 :root {
   --font-display: "Schibsted Grotesk", system-ui, sans-serif;
   --font-body: "Hanken Grotesk", system-ui, sans-serif;
+  /* light theme (default) */
+  --bg: 245 245 247;
+  --surface: 255 255 255;
+  --ink: 17 17 19;
+  --muted: 90 90 99;
+}
+.dark {
+  /* dark theme */
+  --bg: 10 10 10;
+  --surface: 26 26 26;
+  --ink: 245 245 245;
+  --muted: 154 154 162;
 }
 html[lang="th"] { --font-display: "Kanit", sans-serif; --font-body: "Noto Sans Thai", sans-serif; }
 html[lang="cn"] { --font-display: "Noto Sans SC", sans-serif; --font-body: "Noto Sans SC", sans-serif; }
@@ -14,7 +26,8 @@ html[lang="jp"] { --font-display: "Noto Sans JP", sans-serif; --font-body: "Noto
 
 html { scroll-behavior: smooth; }
 body {
-  background: #0A0A0A; color: #F5F5F5;
+  background: rgb(var(--bg)); color: rgb(var(--ink));
+  transition: background-color .4s ease, color .4s ease;
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
