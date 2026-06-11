@@ -1,17 +1,21 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { uploadMedia } from "@/lib/cloudinary";
 import { slugify, ADMIN_EMAIL } from "@/lib/utils";
 import type { Project, Review, TrustedBy } from "@/lib/types";
 
 async function requireOwner() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
+  // 1) Verify the caller is the signed-in owner (reads the auth cookie).
+  const ssr = await createClient();
+  const { data } = await ssr.auth.getUser();
   if (!data.user || data.user.email?.toLowerCase() !== ADMIN_EMAIL) {
     throw new Error("Access denied — not the authorized owner.");
   }
-  return supabase;
+  // 2) Return a service-role client for the actual writes (bypasses RLS safely,
+  //    server-side only). This avoids "permission denied" from cookie/session gaps.
+  return createAdminClient();
 }
 
 /** Upload a base64 data URI to Cloudinary, return the secure URL. */
@@ -26,7 +30,24 @@ export async function saveProject(p: Partial<Project>) {
   // empty slug; fall back to a unique timestamp slug in that case.
   const base = slugify(p.title || "");
   const slug = p.slug || base || `project-${Date.now().toString(36)}`;
-  const row = { ...p, slug };
+  // Only send columns that actually exist in the DB (drop UI-only fields like `ci`).
+  const row = {
+    title: p.title ?? "Untitled",
+    slug,
+    description: p.description ?? null,
+    category: p.category,
+    tags: p.tags ?? [],
+    client: p.client ?? null,
+    year: p.year ?? null,
+    services: p.services ?? [],
+    challenge: p.challenge ?? null,
+    solution: p.solution ?? null,
+    results: p.results ?? null,
+    featured: p.featured ?? false,
+    thumbnail: p.thumbnail ?? null,
+    gallery: p.gallery ?? [],
+    video_url: p.video_url ?? null,
+  };
   const { error } = p.id
     ? await supabase.from("projects").update(row).eq("id", p.id)
     : await supabase.from("projects").insert(row);
