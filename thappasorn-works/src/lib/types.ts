@@ -21,6 +21,8 @@ export interface Project {
   thumbnail?: string;
   gallery: string[];
   video_url?: string;
+  /** card aspect ratio: 'landscape' = 16:9, 'portrait' = 9:16, 'square' = 1:1 (default) */
+  orientation?: 'landscape' | 'portrait' | 'square';
   views?: number;
   created_at: string;
   /** fallback gradient index when no thumbnail is uploaded */
