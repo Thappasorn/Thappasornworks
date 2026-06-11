@@ -43,6 +43,7 @@ export async function saveProject(p: Partial<Project>) {
     thumbnail: p.thumbnail ?? null,
     gallery: p.gallery ?? [],
     video_url: p.video_url ?? null,
+    orientation: p.orientation ?? "square",
   };
   const { error } = p.id
     ? await supabase.from("projects").update(row).eq("id", p.id)
