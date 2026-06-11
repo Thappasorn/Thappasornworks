@@ -4,7 +4,7 @@ import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import {
-  uploadAction, saveProject, deleteProject, toggleFeatured,
+  saveProject, deleteProject, toggleFeatured,
   saveReview, deleteReview, saveLogo, deleteLogo, exportTable,
 } from "@/app/[locale]/admin/actions";
 import type { Project, Review, TrustedBy, Category } from "@/lib/types";
@@ -13,8 +13,21 @@ import { trackDownload } from "@/lib/analytics";
 type Analytics = { visitors: number; views: number; line: number; email: number; phone: number; top: { title: string; slug: string; views: number }[] } | null;
 const CATS: Category[] = ["graphics", "shot-videos", "long-form-video", "filming-photography"];
 
-function fileToDataUri(file: File): Promise<string> {
-  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = rej; r.readAsDataURL(file); });
+/** Upload straight from the browser to Cloudinary (unsigned preset).
+ *  Bypasses the server entirely, so large images & videos work
+ *  (server actions on Vercel are limited to ~1MB bodies). */
+async function uploadDirect(file: File): Promise<string> {
+  const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  if (!cloud) throw new Error("Cloudinary cloud name is not configured");
+  if (!preset) throw new Error("Missing NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET — create an unsigned upload preset in Cloudinary and add it to Vercel env");
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", preset);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/auto/upload`, { method: "POST", body: fd });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error?.message || "Cloudinary upload failed");
+  return json.secure_url as string;
 }
 
 export default function AdminDashboard({ configured, projects, reviews, trusted, analytics }: {
@@ -74,7 +87,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
 function ProjectsTab({ projects, busy, guard }: { projects: Project[]; busy: boolean; guard: (fn: () => Promise<void>) => () => void }) {
   const empty: Partial<Project> = { title: "", category: "graphics", tags: [], featured: false, gallery: [] };
   const [f, setF] = useState<Partial<Project>>(empty);
-  const upload = async (file: File, type: "image" | "video" = "image") => uploadAction(await fileToDataUri(file), type);
+  const upload = async (file: File) => { try { return await uploadDirect(file); } catch (e) { alert(String(e)); throw e; } };
 
   return (
     <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
@@ -95,7 +108,7 @@ function ProjectsTab({ projects, busy, guard }: { projects: Project[]; busy: boo
           <Field key={k} label={k}><textarea className="inp" rows={2} value={(f[k] as string) ?? ""} onChange={(e) => setF({ ...f, [k]: e.target.value })} /></Field>
         ))}
         <Field label="Thumbnail">
-          <input type="file" accept="image/*,video/*" onChange={async (e) => { const file = e.target.files?.[0]; if (file) setF({ ...f, thumbnail: await upload(file, file.type.startsWith("video") ? "video" : "image") }); }} />
+          <input type="file" accept="image/*,video/*" onChange={async (e) => { const file = e.target.files?.[0]; if (file) setF({ ...f, thumbnail: await upload(file) }); }} />
           {f.thumbnail && <span className="text-xs text-accent">✓ uploaded</span>}
         </Field>
         <Field label="Gallery (multiple)">
@@ -125,7 +138,7 @@ function ProjectsTab({ projects, busy, guard }: { projects: Project[]; busy: boo
 function ReviewsTab({ reviews, busy, guard }: { reviews: Review[]; busy: boolean; guard: (fn: () => Promise<void>) => () => void }) {
   const empty: Partial<Review> = { client_name: "", rating: 5, featured: false };
   const [f, setF] = useState<Partial<Review>>(empty);
-  const upload = async (file: File) => uploadAction(await fileToDataUri(file), "image");
+  const upload = async (file: File) => { try { return await uploadDirect(file); } catch (e) { alert(String(e)); throw e; } };
   return (
     <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
       <form className="card-glass space-y-3 p-5" onSubmit={(e) => e.preventDefault()}>
@@ -164,7 +177,7 @@ function ReviewsTab({ reviews, busy, guard }: { reviews: Review[]; busy: boolean
 /* ---------------- Logos ---------------- */
 function LogosTab({ trusted, busy, guard }: { trusted: TrustedBy[]; busy: boolean; guard: (fn: () => Promise<void>) => () => void }) {
   const [name, setName] = useState(""); const [logo, setLogo] = useState<string | undefined>();
-  const upload = async (file: File) => uploadAction(await fileToDataUri(file), "image");
+  const upload = async (file: File) => { try { return await uploadDirect(file); } catch (e) { alert(String(e)); throw e; } };
   return (
     <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
       <form className="card-glass space-y-3 p-5" onSubmit={(e) => e.preventDefault()}>
