@@ -90,7 +90,7 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
       )}
 
       <div className="pointer-events-none absolute inset-0 ring-0 ring-accent transition-all duration-500 group-hover:ring-2" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-10">
+      <div className={`pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-10 transition-opacity duration-300 ${(hover && canHover && (embed || direct)) || tapPlay ? "opacity-0" : "opacity-100"}`}>
         <div className="h-display line-clamp-2 text-[13px] leading-snug text-white">{p.title}</div>
         <div className="mt-0.5 text-[11px] uppercase tracking-wider text-accent">{p.tags[0] ?? p.category}</div>
       </div>
