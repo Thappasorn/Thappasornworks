@@ -1,21 +1,17 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { uploadMedia } from "@/lib/cloudinary";
 import { slugify, ADMIN_EMAIL } from "@/lib/utils";
 import type { Project, Review, TrustedBy } from "@/lib/types";
 
 async function requireOwner() {
-  // 1) Verify the caller is the signed-in owner (reads the auth cookie).
-  const ssr = await createClient();
-  const { data } = await ssr.auth.getUser();
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
   if (!data.user || data.user.email?.toLowerCase() !== ADMIN_EMAIL) {
     throw new Error("Access denied — not the authorized owner.");
   }
-  // 2) Return a service-role client for the actual writes (bypasses RLS safely,
-  //    server-side only). This avoids "permission denied" from cookie/session gaps.
-  return createAdminClient();
+  return supabase;
 }
 
 /** Upload a base64 data URI to Cloudinary, return the secure URL. */
