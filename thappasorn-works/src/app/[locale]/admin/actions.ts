@@ -1,18 +1,17 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { uploadMedia } from "@/lib/cloudinary";
 import { slugify, ADMIN_EMAIL } from "@/lib/utils";
 import type { Project, Review, TrustedBy } from "@/lib/types";
 
 async function requireOwner() {
-  const ssr = await createClient();
-  const { data } = await ssr.auth.getUser();
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
   if (!data.user || data.user.email?.toLowerCase() !== ADMIN_EMAIL) {
     throw new Error("Access denied — not the authorized owner.");
   }
-  return createAdminClient();
+  return supabase;
 }
 
 /** Upload a base64 data URI to Cloudinary, return the secure URL. */
