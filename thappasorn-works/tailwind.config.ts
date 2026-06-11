@@ -2,15 +2,18 @@ import type { Config } from "tailwindcss";
 
 export default {
   content: ["./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        bg: "#0A0A0A",
-        surface: "#1A1A1A",
+        // Driven by CSS variables so light/dark themes flip automatically.
+        bg: "rgb(var(--bg) / <alpha-value>)",
+        surface: "rgb(var(--surface) / <alpha-value>)",
+        ink: "rgb(var(--ink) / <alpha-value>)",
+        muted: "rgb(var(--muted) / <alpha-value>)",
+        // Brand accent stays constant in both themes.
         accent: "#FF6B00",
         "accent-soft": "#FF8A33",
-        ink: "#F5F5F5",
-        muted: "#9A9AA2",
       },
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],
