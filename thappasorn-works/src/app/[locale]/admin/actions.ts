@@ -22,9 +22,15 @@ export async function uploadAction(dataUri: string, type: "image" | "video" = "i
 
 export async function saveProject(p: Partial<Project>) {
   const supabase = await requireOwner();
-  const row = { ...p, slug: p.slug || slugify(p.title || "untitled") };
-  if (p.id) await supabase.from("projects").update(row).eq("id", p.id);
-  else await supabase.from("projects").insert(row);
+  // slugify() strips non-Latin characters, so Thai titles would produce an
+  // empty slug; fall back to a unique timestamp slug in that case.
+  const base = slugify(p.title || "");
+  const slug = p.slug || base || `project-${Date.now().toString(36)}`;
+  const row = { ...p, slug };
+  const { error } = p.id
+    ? await supabase.from("projects").update(row).eq("id", p.id)
+    : await supabase.from("projects").insert(row);
+  if (error) throw new Error(`Save failed: ${error.message}`);
   revalidatePath("/", "layout");
 }
 export async function deleteProject(id: string) {
@@ -40,8 +46,10 @@ export async function toggleFeatured(id: string, featured: boolean) {
 
 export async function saveReview(r: Partial<Review>) {
   const supabase = await requireOwner();
-  if (r.id) await supabase.from("reviews").update(r).eq("id", r.id);
-  else await supabase.from("reviews").insert(r);
+  const { error } = r.id
+    ? await supabase.from("reviews").update(r).eq("id", r.id)
+    : await supabase.from("reviews").insert(r);
+  if (error) throw new Error(`Save failed: ${error.message}`);
   revalidatePath("/", "layout");
 }
 export async function deleteReview(id: string) {
@@ -52,7 +60,8 @@ export async function deleteReview(id: string) {
 
 export async function saveLogo(l: Partial<TrustedBy>) {
   const supabase = await requireOwner();
-  await supabase.from("trusted_by").insert(l);
+  const { error } = await supabase.from("trusted_by").insert(l);
+  if (error) throw new Error(`Save failed: ${error.message}`);
   revalidatePath("/", "layout");
 }
 export async function deleteLogo(id: string) {
