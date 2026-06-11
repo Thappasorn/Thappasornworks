@@ -85,7 +85,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
 
 /* ---------------- Projects ---------------- */
 function ProjectsTab({ projects, busy, guard }: { projects: Project[]; busy: boolean; guard: (fn: () => Promise<void>) => () => void }) {
-  const empty: Partial<Project> = { title: "", category: "graphics", tags: [], featured: false, gallery: [] };
+  const empty: Partial<Project> = { title: "", category: "graphics", tags: [], featured: false, gallery: [], orientation: "square" };
   const [f, setF] = useState<Partial<Project>>(empty);
   const upload = async (file: File) => { try { return await uploadDirect(file); } catch (e) { alert(String(e)); throw e; } };
 
@@ -104,6 +104,13 @@ function ProjectsTab({ projects, busy, guard }: { projects: Project[]; busy: boo
           <Field label="Year"><input className="inp" value={f.year ?? ""} onChange={(e) => setF({ ...f, year: e.target.value })} /></Field>
         </div>
         <Field label="Video URL"><input className="inp" value={f.video_url ?? ""} onChange={(e) => setF({ ...f, video_url: e.target.value })} /></Field>
+        <Field label="Card shape / orientation">
+          <select className="inp" value={f.orientation ?? "square"} onChange={(e) => setF({ ...f, orientation: e.target.value as Project["orientation"] })}>
+            <option value="square">Square 1:1</option>
+            <option value="landscape">Landscape 16:9 (yok video)</option>
+            <option value="portrait">Portrait 9:16 (tang video / Reels / TikTok)</option>
+          </select>
+        </Field>
         {(["challenge", "solution", "results"] as const).map((k) => (
           <Field key={k} label={k}><textarea className="inp" rows={2} value={(f[k] as string) ?? ""} onChange={(e) => setF({ ...f, [k]: e.target.value })} /></Field>
         ))}
