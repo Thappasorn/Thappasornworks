@@ -9,6 +9,27 @@ import ViewTracker from "@/components/ViewTracker";
 import { getProject, getProjects } from "@/lib/data";
 import { grad } from "@/lib/utils";
 
+function embedUrl(url?: string): string | null {
+  if (!url) return null;
+  // YouTube
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  // Vimeo
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  // TikTok  (https://www.tiktok.com/@user/video/123  or  vm.tiktok short links resolve client-side)
+  const tiktok = url.match(/tiktok\.com\/(?:@[\w.-]+\/video\/|v\/)?(\d{6,})/);
+  if (tiktok) return `https://www.tiktok.com/embed/v2/${tiktok[1]}`;
+  // Facebook video / watch / reel
+  if (/facebook\.com|fb\.watch/.test(url)) {
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`;
+  }
+  // Google Drive  (https://drive.google.com/file/d/FILEID/view)
+  const gdrive = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+  if (gdrive) return `https://drive.google.com/file/d/${gdrive[1]}/preview`;
+  return null;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProject(slug);
@@ -38,7 +59,21 @@ export default async function ProjectPage({ params }: { params: Promise<{ locale
         </div>
 
         <div className="relative mt-10 aspect-video overflow-hidden rounded-[22px]">
-          {p.thumbnail ? <Image src={p.thumbnail} alt={p.title} fill className="object-cover" /> : <div className="absolute inset-0" style={{ background: grad(p.ci) }} />}
+          {embedUrl(p.video_url) ? (
+            <iframe
+              src={embedUrl(p.video_url)!}
+              className="absolute inset-0 h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={p.title}
+            />
+          ) : p.video_url ? (
+            <video src={p.video_url} controls className="absolute inset-0 h-full w-full object-contain bg-black" />
+          ) : p.thumbnail ? (
+            <Image src={p.thumbnail} alt={p.title} fill className="object-cover" />
+          ) : (
+            <div className="absolute inset-0" style={{ background: grad(p.ci) }} />
+          )}
         </div>
 
         <div className="mt-14 grid gap-10 lg:grid-cols-3">
