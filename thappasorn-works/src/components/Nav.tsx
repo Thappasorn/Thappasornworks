@@ -50,8 +50,8 @@ export default function Nav() {
         </button>
       </div>
 
-      {/* mobile overlay */}
-      <div className={`fixed inset-0 z-[999] flex flex-col items-center justify-center gap-3 bg-bg/95 backdrop-blur-2xl transition-all duration-300 md:hidden ${open ? "visible opacity-100" : "invisible opacity-0"}`}>
+      {/* mobile overlay — fully opaque so page content never shows through */}
+      <div style={{ backgroundColor: "rgb(var(--bg))" }} className={`fixed inset-0 z-[1100] flex flex-col items-center justify-center gap-3 transition-all duration-300 md:hidden ${open ? "visible opacity-100" : "pointer-events-none invisible opacity-0"}`}>
         <button onClick={() => setOpen(false)} className="absolute right-5 top-5 grid h-11 w-11 place-items-center rounded-full border border-white/10" aria-label="Close">
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
