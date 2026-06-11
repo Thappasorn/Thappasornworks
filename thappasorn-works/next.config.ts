@@ -10,7 +10,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
-  experimental: { optimizePackageImports: ["framer-motion"] },
+  experimental: {
+    optimizePackageImports: ["framer-motion"],
+    serverActions: { bodySizeLimit: "4mb" },
+  },
 };
 
 export default withNextIntl(nextConfig);
