@@ -127,3 +127,18 @@ export async function exportTable(
   const { data } = await supabase.from(table).select("*");
   return { exportedAt, table, rows: data ?? [] };
 }
+
+/* ---------------- Enquiries (contact inbox) ---------------- */
+export async function markEnquiryRead(id: string, read: boolean) {
+  const supabase = await requireOwner();
+  const { error } = await supabase.from("enquiries").update({ read }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}
+
+export async function deleteEnquiry(id: string) {
+  const supabase = await requireOwner();
+  const { error } = await supabase.from("enquiries").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}

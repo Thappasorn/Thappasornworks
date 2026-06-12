@@ -59,3 +59,13 @@ export const CATEGORY_META: Record<Category, { route: string; key: string }> = {
   "long-form-video": { route: "/long-form-video", key: "longs" },
   "filming-photography": { route: "/filming-photography", key: "photo" },
 };
+
+export interface Enquiry {
+  id: string;
+  name: string;
+  email: string;
+  project_type?: string | null;
+  message?: string | null;
+  read: boolean;
+  created_at: string;
+}

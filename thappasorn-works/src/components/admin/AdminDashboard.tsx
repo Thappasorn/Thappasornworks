@@ -6,8 +6,9 @@ import { createClient } from "@/lib/supabase/client";
 import {
   saveProject, deleteProject, toggleFeatured,
   saveReview, deleteReview, saveLogo, deleteLogo, exportTable,
+  markEnquiryRead, deleteEnquiry,
 } from "@/app/[locale]/admin/actions";
-import type { Project, Review, TrustedBy, Category } from "@/lib/types";
+import type { Project, Review, TrustedBy, Category, Enquiry } from "@/lib/types";
 import { trackDownload } from "@/lib/analytics";
 
 type Analytics = { visitors: number; views: number; line: number; email: number; phone: number; top: { title: string; slug: string; views: number }[] } | null;
@@ -30,12 +31,13 @@ async function uploadDirect(file: File): Promise<string> {
   return json.secure_url as string;
 }
 
-export default function AdminDashboard({ configured, projects, reviews, trusted, analytics }: {
+export default function AdminDashboard({ configured, projects, reviews, trusted, analytics, enquiries = [] }: {
   configured: boolean; projects: Project[]; reviews: Review[]; trusted: TrustedBy[]; analytics: Analytics;
+  enquiries?: Enquiry[];
 }) {
   const t = useTranslations("admin");
   const router = useRouter();
-  const [tab, setTab] = useState<"analytics" | "projects" | "reviews" | "logos" | "backup">("analytics");
+  const [tab, setTab] = useState<"analytics" | "projects" | "reviews" | "logos" | "inbox" | "backup">("analytics");
   const [busy, setBusy] = useState(false);
 
   const logout = async () => { if (configured) await createClient().auth.signOut(); router.replace("/admin/login"); };
@@ -54,7 +56,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
       {!configured && <p className="mt-4 rounded-xl border border-accent/30 bg-accent/10 p-3 text-sm text-accent">Demo mode — Supabase isn&apos;t configured. Add your keys (README) to enable uploads &amp; saving.</p>}
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {(["analytics", "projects", "reviews", "logos", "backup"] as const).map((k) => (
+        {(["analytics", "projects", "reviews", "logos", "inbox", "backup"] as const).map((k) => (
           <button key={k} onClick={() => setTab(k)} className={`chip ${tab === k ? "chip-on" : ""}`}>{t(k)}</button>
         ))}
       </div>
@@ -77,6 +79,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
         {tab === "projects" && <ProjectsTab projects={projects} busy={busy} guard={guard} />}
         {tab === "reviews" && <ReviewsTab reviews={reviews} busy={busy} guard={guard} />}
         {tab === "logos" && <LogosTab trusted={trusted} busy={busy} guard={guard} />}
+        {tab === "inbox" && <InboxTab enquiries={enquiries} busy={busy} guard={guard} />}
         {tab === "backup" && <BackupTab configured={configured} />}
       </div>
     </div>
@@ -126,7 +129,9 @@ function ProjectsTab({ projects, busy, guard }: { projects: Project[]; busy: boo
         <button disabled={busy} onClick={guard(async () => { await saveProject(f); setF(empty); })} className="btn-fill w-full justify-center">{f.id ? "Save changes" : "+ Add project"}</button>
       </form>
 
-      <div className="space-y-2">
+      <div className="space-y-4">
+        <BulkAdd guard={guard} busy={busy} />
+        <div className="space-y-2">
         {projects.map((p) => (
           <div key={p.id} className="flex items-center gap-3 rounded-xl border border-white/5 p-3">
             <div className="h-12 w-12 shrink-0 rounded-lg bg-surface" />
@@ -136,7 +141,116 @@ function ProjectsTab({ projects, busy, guard }: { projects: Project[]; busy: boo
             <button onClick={guard(async () => deleteProject(p.id))} className="text-sm text-muted hover:text-red-400">delete</button>
           </div>
         ))}
+        </div>
       </div>
+    </div>
+  );
+}
+
+/* ---------------- Bulk add ---------------- */
+function BulkAdd({ guard, busy }: { busy: boolean; guard: (fn: () => Promise<void>) => () => void }) {
+  const [open, setOpen] = useState(false);
+  const [links, setLinks] = useState("");
+  const [cat, setCat] = useState<Category>("shot-videos");
+  const [orient, setOrient] = useState<NonNullable<Project["orientation"]>>("portrait");
+  const [progress, setProgress] = useState("");
+
+  async function titleFor(url: string): Promise<string> {
+    try {
+      const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(4000) });
+      const j = await res.json();
+      if (j?.title) return String(j.title);
+    } catch {}
+    return "Untitled video";
+  }
+
+  const addLinks = guard(async () => {
+    const urls = links.split(/\n+/).map((u) => u.trim()).filter(Boolean);
+    if (!urls.length) { alert("Paste at least one link (one per line)"); return; }
+    let done = 0;
+    for (const url of urls) {
+      setProgress(`Adding ${done + 1}/${urls.length}…`);
+      const title = await titleFor(url);
+      await saveProject({ title, category: cat, orientation: orient, video_url: url, tags: [], gallery: [], featured: false });
+      done++;
+    }
+    setProgress(`✓ Added ${done} projects`);
+    setLinks("");
+  });
+
+  const addImages = guard(async () => {
+    const input = document.createElement("input");
+    input.type = "file"; input.accept = "image/*"; input.multiple = true;
+    const files: File[] = await new Promise((res) => { input.onchange = () => res(Array.from(input.files ?? [])); input.click(); });
+    if (!files.length) return;
+    let done = 0;
+    for (const file of files) {
+      setProgress(`Uploading ${done + 1}/${files.length}…`);
+      const url = await uploadDirect(file);
+      const title = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim() || "Untitled";
+      await saveProject({ title, category: cat, orientation: orient, thumbnail: url, tags: [], gallery: [], featured: false });
+      done++;
+    }
+    setProgress(`✓ Added ${done} projects`);
+  });
+
+  return (
+    <div className="card-glass p-4">
+      <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between text-left font-semibold">
+        <span>⚡ Bulk add <span className="text-xs font-normal text-muted">— add many at once</span></span>
+        <span className="text-muted">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <div className="mt-4 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Category for all">
+              <select className="inp" value={cat} onChange={(e) => setCat(e.target.value as Category)}>
+                {CATS.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </Field>
+            <Field label="Card shape for all">
+              <select className="inp" value={orient} onChange={(e) => setOrient(e.target.value as NonNullable<Project["orientation"]>)}>
+                <option value="portrait">Portrait 9:16</option>
+                <option value="landscape">Landscape 16:9</option>
+                <option value="square">Square 1:1</option>
+              </select>
+            </Field>
+          </div>
+          <Field label="Video links — one per line (YouTube / TikTok / Drive)">
+            <textarea className="inp" rows={4} placeholder={"https://youtu.be/...\nhttps://youtu.be/..."} value={links} onChange={(e) => setLinks(e.target.value)} />
+          </Field>
+          <div className="flex flex-wrap gap-2">
+            <button disabled={busy} onClick={addLinks} className="btn-fill">Add all links</button>
+            <button disabled={busy} onClick={addImages} className="btn-line">Or pick many images…</button>
+          </div>
+          {progress && <div className="text-sm text-accent">{progress}</div>}
+          <p className="text-xs text-muted">Titles come from YouTube automatically (editable later). Images use their filename as the title.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- Inbox (contact enquiries) ---------------- */
+function InboxTab({ enquiries, busy, guard }: { enquiries: Enquiry[]; busy: boolean; guard: (fn: () => Promise<void>) => () => void }) {
+  if (!enquiries.length) return <p className="text-muted">No enquiries yet. Messages sent from the contact form will appear here.</p>;
+  return (
+    <div className="space-y-3">
+      {enquiries.map((q) => (
+        <div key={q.id} className={`rounded-xl border p-4 ${q.read ? "border-white/5 opacity-60" : "border-accent/40"}`}>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="font-semibold">{q.name}</span>
+            <a href={`mailto:${q.email}`} className="text-sm text-accent hover:underline">{q.email}</a>
+            {q.project_type && <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted">{q.project_type}</span>}
+            <span className="ml-auto text-xs text-muted">{new Date(q.created_at).toLocaleString()}</span>
+          </div>
+          {q.message && <p className="mt-2 whitespace-pre-wrap text-sm text-ink/90">{q.message}</p>}
+          <div className="mt-3 flex gap-3 text-sm">
+            <button disabled={busy} onClick={guard(async () => markEnquiryRead(q.id, !q.read))} className="text-muted hover:text-accent">{q.read ? "Mark unread" : "Mark read"}</button>
+            <button disabled={busy} onClick={guard(async () => deleteEnquiry(q.id))} className="text-muted hover:text-red-400">delete</button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

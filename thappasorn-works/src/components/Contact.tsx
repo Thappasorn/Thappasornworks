@@ -3,17 +3,26 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { trackLineClick, trackEmailClick, trackPhoneClick, trackContactSubmit } from "@/lib/analytics";
 import { LINE_URL, EMAIL, PHONE, PHONE_RAW } from "@/lib/utils";
+import { submitEnquiry } from "@/app/actions/contact";
 
 export default function Contact() {
   const t = useTranslations("contact");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
   const [f, setF] = useState({ name: "", email: "", type: "", msg: "" });
-  const submit = () => {
-    if (!f.name || !f.email) return;
-    // mailto handoff (swap for a Supabase insert / email API in production)
-    trackContactSubmit(f.type);
-    window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent("Project enquiry — " + f.name)}&body=${encodeURIComponent(`${f.msg}\n\n${f.type}\n${f.email}`)}`;
-    setSent(true);
+  const submit = async () => {
+    if (!f.name || !f.email || sending) return;
+    setSending(true);
+    try {
+      await submitEnquiry(f);          // stored in the site's database — no mail app
+      trackContactSubmit(f.type);
+      setSent(true);
+      setF({ name: "", email: "", type: "", msg: "" });
+    } catch (e) {
+      alert(String(e));
+    } finally {
+      setSending(false);
+    }
   };
   return (
     <section id="contact" className="container-x border-t border-white/5 py-24 md:py-32">
@@ -34,7 +43,8 @@ export default function Contact() {
             <label className="mb-2 block text-[13px] font-semibold text-muted">{t("message")}</label>
             <textarea rows={5} value={f.msg} onChange={(e) => setF({ ...f, msg: e.target.value })} className="w-full resize-y rounded-[14px] border border-white/10 bg-surface px-4 py-3.5 text-[15px] outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20" />
           </div>
-          <button onClick={submit} className="btn-fill">{sent ? "✓" : t("send")}</button>
+          <button onClick={submit} disabled={sending} className="btn-fill">{sending ? "…" : sent ? "✓ Sent" : t("send")}</button>
+          {sent && <p className="mt-3 text-sm text-accent">✓ Got it — I&apos;ll reply within 48 hours.</p>}
         </div>
 
         <div className="flex flex-col gap-6">

@@ -18,8 +18,14 @@ export default async function AdminPage() {
     }
   }
   const [projects, reviews, trusted] = await Promise.all([getProjects(), getReviews(), getTrusted()]);
+  let enquiries: import("@/lib/types").Enquiry[] = [];
+  if (configured) {
+    const supabase = await createClient();
+    const { data: enq } = await supabase.from("enquiries").select("*").order("created_at", { ascending: false }).limit(200);
+    enquiries = (enq as import("@/lib/types").Enquiry[]) ?? [];
+  }
   const analytics = configured
     ? await getAnalytics().catch(() => null)
     : { visitors: 4231, views: 1894, line: 96, email: 54, phone: 38, top: projects.slice(0, 5).map((p) => ({ title: p.title, slug: p.slug, views: p.views ?? 0 })) };
-  return <AdminDashboard configured={configured} projects={projects} reviews={reviews} trusted={trusted} analytics={analytics} />;
+  return <AdminDashboard configured={configured} projects={projects} reviews={reviews} trusted={trusted} analytics={analytics} enquiries={enquiries} />;
 }
