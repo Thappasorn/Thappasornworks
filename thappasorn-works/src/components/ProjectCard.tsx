@@ -57,6 +57,7 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [inView, setInView] = useState(false); // autoplay when scrolled into view
+  const [hovering, setHovering] = useState(false);
   const [sound, setSound] = useState(false);    // tap to enable sound
   const direct = isDirectVideo(p.video_url);
   const embed = previewEmbed(p.video_url, sound);
@@ -97,6 +98,8 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
     <Link
       ref={ref}
       href={`/project/${p.slug}`}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
       className={`group relative block ${aspect} overflow-hidden rounded-[14px] shadow-2xl transition-transform duration-500 ease-apple hover:-translate-y-1.5`}
     >
       {/* base layer */}
@@ -104,7 +107,11 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
         <Image src={p.thumbnail} alt={p.title} fill sizes="(max-width:768px) 50vw, 25vw" className="object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
       ) : bunnyAssets ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={bunnyAssets.webp} alt={p.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
+        <img
+          src={hovering ? bunnyAssets.webp : bunnyAssets.thumb}
+          alt={p.title}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105"
+        />
       ) : ytThumb ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={`https://i.ytimg.com/vi/${ytThumb}/hqdefault.jpg`} alt={p.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
