@@ -6,6 +6,21 @@ import { Link } from "@/i18n/routing";
 import { grad } from "@/lib/utils";
 import type { Project } from "@/lib/types";
 
+/** Bunny: returns {lib, vid} from an iframe url or "lib/vid" shorthand. */
+function bunnyIds(url?: string): { lib: string; vid: string } | null {
+  if (!url) return null;
+  const m = url.match(/(?:mediadelivery\.net\/(?:embed|play)\/|^)(\d{5,7})\/([\w-]{8,})/);
+  return m ? { lib: m[1], vid: m[2] } : null;
+}
+/** If a Bunny direct CDN host is present (vz-...-NNN.b-cdn.net/VIDEOID/...),
+ *  build the animated WebP preview + static thumbnail URLs. */
+function bunnyCdnAssets(url?: string): { webp: string; thumb: string } | null {
+  if (!url) return null;
+  const m = url.match(/(https?:\/\/[\w-]+\.b-cdn\.net)\/([\w-]{8,})/);
+  if (!m) return null;
+  return { webp: `${m[1]}/${m[2]}/preview.webp`, thumb: `${m[1]}/${m[2]}/thumbnail.jpg` };
+}
+
 function youtubeId(url?: string): string | null {
   if (!url) return null;
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
@@ -46,6 +61,7 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
   const direct = isDirectVideo(p.video_url);
   const embed = previewEmbed(p.video_url, sound);
   const ytThumb = !p.thumbnail ? youtubeId(p.video_url) : null;
+  const bunnyAssets = !p.thumbnail ? bunnyCdnAssets(p.video_url) : null;
   const playable = !!(direct || embed);
 
   // autoplay (muted) only while the card is on screen — saves data, mirrors premium agency sites
@@ -86,6 +102,9 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
       {/* base layer */}
       {p.thumbnail ? (
         <Image src={p.thumbnail} alt={p.title} fill sizes="(max-width:768px) 50vw, 25vw" className="object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
+      ) : bunnyAssets ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={bunnyAssets.webp} alt={p.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
       ) : ytThumb ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={`https://i.ytimg.com/vi/${ytThumb}/hqdefault.jpg`} alt={p.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
