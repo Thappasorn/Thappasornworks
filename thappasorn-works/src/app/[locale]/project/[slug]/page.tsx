@@ -27,6 +27,8 @@ function embedUrl(url?: string): string | null {
   // Google Drive  (https://drive.google.com/file/d/FILEID/view)
   const gdrive = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
   if (gdrive) return `https://drive.google.com/file/d/${gdrive[1]}/preview`;
+  const bunny = url.match(/(?:mediadelivery\.net\/(?:embed|play)\/|^)(\d{5,7})\/([\w-]{8,})/);
+  if (bunny) return `https://iframe.mediadelivery.net/embed/${bunny[1]}/${bunny[2]}?autoplay=true&loop=false&preload=true&responsive=true`;
   return null;
 }
 

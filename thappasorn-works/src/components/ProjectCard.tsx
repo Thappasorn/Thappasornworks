@@ -16,11 +16,14 @@ function youtubeId(url?: string): string | null {
 function previewEmbed(url: string | undefined, sound: boolean): string | null {
   if (!url) return null;
   const yt = youtubeId(url);
-  if (yt) return `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=${sound ? 0 : 1}&controls=0&loop=1&playlist=${yt}&modestbranding=1&playsinline=1&rel=0`;
+  if (yt) return `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=${sound ? 0 : 1}&controls=0&loop=1&playlist=${yt}&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&cc_load_policy=0`;
   const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1&muted=${sound ? 0 : 1}&loop=1&background=${sound ? 0 : 1}`;
   const drive = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
   if (drive) return `https://drive.google.com/file/d/${drive[1]}/preview`;
+  // Bunny Stream — accept full iframe url or "libraryId/videoId" shorthand
+  const bunny = url.match(/(?:mediadelivery\.net\/(?:embed|play)\/|^)(\d{5,7})\/([\w-]{8,})/);
+  if (bunny) return `https://iframe.mediadelivery.net/embed/${bunny[1]}/${bunny[2]}?autoplay=true&loop=true&muted=${sound ? "false" : "true"}&preload=true&responsive=true`;
   return null;
 }
 
@@ -98,8 +101,20 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
 
       {/* embedded platforms — mount while in view */}
       {!direct && embed && inView && (
-        <iframe key={String(sound)} src={embed} className="absolute inset-0 h-full w-full"
-          allow="autoplay; encrypted-media; picture-in-picture" style={{ border: 0, pointerEvents: "none" }} title={p.title} />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <iframe
+            key={String(sound)}
+            src={embed}
+            // oversize + center so YouTube's channel/title (top) and logo/share (bottom)
+            // fall outside the visible frame and get clipped by the card.
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{ border: 0, pointerEvents: "none", width: "175%", height: "175%" }}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            title={p.title}
+          />
+          {/* transparent shield: blocks any stray YouTube UI clicks */}
+          <span className="absolute inset-0" />
+        </div>
       )}
 
       <div className="pointer-events-none absolute inset-0 ring-0 ring-accent transition-all duration-500 group-hover:ring-2" />
