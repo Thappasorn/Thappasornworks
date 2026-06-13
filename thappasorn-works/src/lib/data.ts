@@ -56,7 +56,7 @@ export function averageRating(reviews: Review[]): string {
 }
 
 const DEFAULT_SETTINGS: import("./types").SiteSettings = {
-  stat_projects: 248, stat_clients: 96, stat_countries: 14, stat_years: 11,
+  stat_projects: 248, stat_clients: 96, stat_countries: 14, stat_years: 11, showreel_url: null,
 };
 
 export async function getSettings(): Promise<import("./types").SiteSettings> {
@@ -70,6 +70,7 @@ export async function getSettings(): Promise<import("./types").SiteSettings> {
       stat_clients: data.stat_clients ?? DEFAULT_SETTINGS.stat_clients,
       stat_countries: data.stat_countries ?? DEFAULT_SETTINGS.stat_countries,
       stat_years: data.stat_years ?? DEFAULT_SETTINGS.stat_years,
+      showreel_url: data.showreel_url ?? null,
     };
   } catch {
     return DEFAULT_SETTINGS;

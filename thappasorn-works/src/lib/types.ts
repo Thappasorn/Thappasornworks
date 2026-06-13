@@ -75,4 +75,5 @@ export interface SiteSettings {
   stat_clients: number;
   stat_countries: number;
   stat_years: number;
+  showreel_url?: string | null;
 }

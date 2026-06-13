@@ -3,13 +3,15 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import HeroShowcase from "./HeroShowcase";
+import HeroBackdrop from "./HeroBackdrop";
 
-export default function Hero() {
+export default function Hero({ showreelUrl }: { showreelUrl?: string | null }) {
   const t = useTranslations("hero");
   const line = { hidden: { y: "110%" }, show: (i: number) => ({ y: 0, transition: { duration: 1, ease: [0.22, 1, 0.36, 1], delay: i * 0.12 } }) };
   return (
     <header className="relative flex min-h-[100svh] items-center overflow-hidden px-5 sm:px-8 lg:px-12">
-      {/* cinematic animated backdrop */}
+      <HeroBackdrop url={showreelUrl} />
+      {/* cinematic animated backdrop (fallback / accent glow) */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -left-[8vw] -top-[6vw] h-[55vw] w-[55vw] rounded-full bg-[radial-gradient(circle,#FF6B00,transparent_60%)] opacity-30 blur-3xl" />
         <div className="absolute -right-[6vw] top-[8vw] h-[46vw] w-[46vw] rounded-full bg-[radial-gradient(circle,#FF8A33,transparent_60%)] opacity-20 blur-3xl" />

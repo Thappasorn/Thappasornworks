@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { setRequestLocale, getMessages } from "next-intl/server";
 import Nav from "@/components/Nav";
+import PageTransition from "@/components/PageTransition";
 import FloatingContact from "@/components/FloatingContact";
 import VisitTracker from "@/components/VisitTracker";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
@@ -68,7 +69,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <VisitTracker />
           <Nav />
-          <main>{children}</main>
+          <main><PageTransition>{children}</PageTransition></main>
           <FloatingContact />
         </NextIntlClientProvider>
       </body>

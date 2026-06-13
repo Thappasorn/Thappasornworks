@@ -18,7 +18,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   ]);
   return (
     <>
-      <Hero />
+      <Hero showreelUrl={settings.showreel_url} />
       <Stats settings={settings} />
       <CategorySection category="graphics" />
       <CategorySection category="shot-videos" />

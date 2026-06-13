@@ -248,6 +248,9 @@ function StatsTab({ settings, busy, guard }: { settings: SiteSettings; busy: boo
         <Field label="Countries served"><input type="number" className="inp" value={v.stat_countries} onChange={num("stat_countries")} /></Field>
         <Field label="Years of experience"><input type="number" className="inp" value={v.stat_years} onChange={num("stat_years")} /></Field>
       </div>
+      <Field label="Showreel video URL (YouTube/Vimeo/MP4) — plays behind the hero">
+        <input className="inp" placeholder="https://youtu.be/... or .mp4 link" value={v.showreel_url ?? ""} onChange={(e) => { setV({ ...v, showreel_url: e.target.value }); setSaved(false); }} />
+      </Field>
       <div className="flex items-center gap-3">
         <button disabled={busy} onClick={save} className="btn-fill">Save stats</button>
         {saved && <span className="text-sm text-accent">✓ Saved — refresh the homepage to see it</span>}
