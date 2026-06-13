@@ -57,12 +57,11 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [inView, setInView] = useState(false); // autoplay when scrolled into view
-  const [hovering, setHovering] = useState(false);
   const [sound, setSound] = useState(false);    // tap to enable sound
   const direct = isDirectVideo(p.video_url);
   const embed = previewEmbed(p.video_url, sound);
   const ytThumb = !p.thumbnail ? youtubeId(p.video_url) : null;
-  const bunnyAssets = !p.thumbnail ? bunnyCdnAssets(p.video_url) : null;
+  const isBunny = !!bunnyIds(p.video_url);
   const playable = !!(direct || embed);
 
   // autoplay (muted) only while the card is on screen — saves data, mirrors premium agency sites
@@ -98,20 +97,11 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
     <Link
       ref={ref}
       href={`/project/${p.slug}`}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
       className={`group relative block ${aspect} overflow-hidden rounded-[14px] shadow-2xl transition-transform duration-500 ease-apple hover:-translate-y-1.5`}
     >
       {/* base layer */}
       {p.thumbnail ? (
         <Image src={p.thumbnail} alt={p.title} fill sizes="(max-width:768px) 50vw, 25vw" className="object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
-      ) : bunnyAssets ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={hovering ? bunnyAssets.webp : bunnyAssets.thumb}
-          alt={p.title}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105"
-        />
       ) : ytThumb ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={`https://i.ytimg.com/vi/${ytThumb}/hqdefault.jpg`} alt={p.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
@@ -131,14 +121,13 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
           <iframe
             key={String(sound)}
             src={embed}
-            // oversize + center so YouTube's channel/title (top) and logo/share (bottom)
-            // fall outside the visible frame and get clipped by the card.
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{ border: 0, pointerEvents: "none", width: "175%", height: "175%" }}
+            // Bunny fills cleanly so only a tiny overscan is needed; YouTube needs more
+            // to push its channel/logo bands off-screen. Both get clipped to the card.
+            style={{ border: 0, pointerEvents: "none", width: isBunny ? "102%" : "175%", height: isBunny ? "102%" : "175%" }}
             allow="autoplay; encrypted-media; picture-in-picture"
             title={p.title}
           />
-          {/* transparent shield: blocks any stray YouTube UI clicks */}
           <span className="absolute inset-0" />
         </div>
       )}
