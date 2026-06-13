@@ -58,7 +58,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ locale
           {p.services?.length ? <Meta k={t("services")} v={p.services.join(", ")} /> : null}
         </div>
 
-        <div className="relative mt-10 aspect-video overflow-hidden rounded-[22px]">
+        <div
+          className={`relative mt-10 overflow-hidden rounded-[22px] ${
+            p.orientation === "portrait"
+              ? "mx-auto aspect-[9/16] max-w-[420px]"
+              : p.orientation === "square"
+              ? "mx-auto aspect-square max-w-[640px]"
+              : "aspect-video"
+          }`}
+        >
           {embedUrl(p.video_url) ? (
             <iframe
               src={embedUrl(p.video_url)!}
