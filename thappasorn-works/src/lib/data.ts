@@ -54,3 +54,24 @@ export function averageRating(reviews: Review[]): string {
   if (!reviews.length) return "5.0";
   return (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1);
 }
+
+const DEFAULT_SETTINGS: import("./types").SiteSettings = {
+  stat_projects: 248, stat_clients: 96, stat_countries: 14, stat_years: 11,
+};
+
+export async function getSettings(): Promise<import("./types").SiteSettings> {
+  if (!supabaseConfigured()) return DEFAULT_SETTINGS;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("site_settings").select("*").eq("id", 1).single();
+    if (!data) return DEFAULT_SETTINGS;
+    return {
+      stat_projects: data.stat_projects ?? DEFAULT_SETTINGS.stat_projects,
+      stat_clients: data.stat_clients ?? DEFAULT_SETTINGS.stat_clients,
+      stat_countries: data.stat_countries ?? DEFAULT_SETTINGS.stat_countries,
+      stat_years: data.stat_years ?? DEFAULT_SETTINGS.stat_years,
+    };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}

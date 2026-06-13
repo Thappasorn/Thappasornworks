@@ -142,3 +142,18 @@ export async function deleteEnquiry(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/", "layout");
 }
+
+/* ---------------- Site settings (editable stats) ---------------- */
+export async function saveSettings(v: { stat_projects: number; stat_clients: number; stat_countries: number; stat_years: number }) {
+  const supabase = await requireOwner();
+  const row = {
+    id: 1,
+    stat_projects: Number(v.stat_projects) || 0,
+    stat_clients: Number(v.stat_clients) || 0,
+    stat_countries: Number(v.stat_countries) || 0,
+    stat_years: Number(v.stat_years) || 0,
+  };
+  const { error } = await supabase.from("site_settings").upsert(row, { onConflict: "id" });
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}

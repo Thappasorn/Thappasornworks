@@ -69,3 +69,10 @@ export interface Enquiry {
   read: boolean;
   created_at: string;
 }
+
+export interface SiteSettings {
+  stat_projects: number;
+  stat_clients: number;
+  stat_countries: number;
+  stat_years: number;
+}

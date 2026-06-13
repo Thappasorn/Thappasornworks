@@ -6,9 +6,9 @@ import { createClient } from "@/lib/supabase/client";
 import {
   saveProject, deleteProject, toggleFeatured,
   saveReview, deleteReview, saveLogo, deleteLogo, exportTable,
-  markEnquiryRead, deleteEnquiry,
+  markEnquiryRead, deleteEnquiry, saveSettings,
 } from "@/app/[locale]/admin/actions";
-import type { Project, Review, TrustedBy, Category, Enquiry } from "@/lib/types";
+import type { Project, Review, TrustedBy, Category, Enquiry, SiteSettings } from "@/lib/types";
 import { trackDownload } from "@/lib/analytics";
 
 type Analytics = { visitors: number; views: number; line: number; email: number; phone: number; top: { title: string; slug: string; views: number }[] } | null;
@@ -31,13 +31,14 @@ async function uploadDirect(file: File): Promise<string> {
   return json.secure_url as string;
 }
 
-export default function AdminDashboard({ configured, projects, reviews, trusted, analytics, enquiries = [] }: {
+export default function AdminDashboard({ configured, projects, reviews, trusted, analytics, enquiries = [], settings }: {
   configured: boolean; projects: Project[]; reviews: Review[]; trusted: TrustedBy[]; analytics: Analytics;
   enquiries?: Enquiry[];
+  settings: SiteSettings;
 }) {
   const t = useTranslations("admin");
   const router = useRouter();
-  const [tab, setTab] = useState<"analytics" | "projects" | "reviews" | "logos" | "inbox" | "backup">("analytics");
+  const [tab, setTab] = useState<"analytics" | "projects" | "stats" | "reviews" | "logos" | "inbox" | "backup">("analytics");
   const [busy, setBusy] = useState(false);
 
   const logout = async () => { if (configured) await createClient().auth.signOut(); router.replace("/admin/login"); };
@@ -56,7 +57,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
       {!configured && <p className="mt-4 rounded-xl border border-accent/30 bg-accent/10 p-3 text-sm text-accent">Demo mode — Supabase isn&apos;t configured. Add your keys (README) to enable uploads &amp; saving.</p>}
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {(["analytics", "projects", "reviews", "logos", "inbox", "backup"] as const).map((k) => (
+        {(["analytics", "projects", "stats", "reviews", "logos", "inbox", "backup"] as const).map((k) => (
           <button key={k} onClick={() => setTab(k)} className={`chip ${tab === k ? "chip-on" : ""}`}>{t(k)}</button>
         ))}
       </div>
@@ -80,6 +81,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
         {tab === "reviews" && <ReviewsTab reviews={reviews} busy={busy} guard={guard} />}
         {tab === "logos" && <LogosTab trusted={trusted} busy={busy} guard={guard} />}
         {tab === "inbox" && <InboxTab enquiries={enquiries} busy={busy} guard={guard} />}
+        {tab === "stats" && <StatsTab settings={settings} busy={busy} guard={guard} />}
         {tab === "backup" && <BackupTab configured={configured} />}
       </div>
     </div>
@@ -227,6 +229,29 @@ function BulkAdd({ guard, busy }: { busy: boolean; guard: (fn: () => Promise<voi
           <p className="text-xs text-muted">Titles come from YouTube automatically (editable later). Images use their filename as the title.</p>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ---------------- Stats (editable hero numbers) ---------------- */
+function StatsTab({ settings, busy, guard }: { settings: SiteSettings; busy: boolean; guard: (fn: () => Promise<void>) => () => void }) {
+  const [v, setV] = useState(settings);
+  const [saved, setSaved] = useState(false);
+  const num = (k: keyof SiteSettings) => (e: React.ChangeEvent<HTMLInputElement>) => { setV({ ...v, [k]: Number(e.target.value) }); setSaved(false); };
+  const save = guard(async () => { await saveSettings(v); setSaved(true); });
+  return (
+    <div className="max-w-lg space-y-4">
+      <p className="text-sm text-muted">These numbers show in the band under the hero. Edit and save — no code upload needed.</p>
+      <div className="grid grid-cols-2 gap-4">
+        <Field label="Projects delivered"><input type="number" className="inp" value={v.stat_projects} onChange={num("stat_projects")} /></Field>
+        <Field label="Happy clients"><input type="number" className="inp" value={v.stat_clients} onChange={num("stat_clients")} /></Field>
+        <Field label="Countries served"><input type="number" className="inp" value={v.stat_countries} onChange={num("stat_countries")} /></Field>
+        <Field label="Years of experience"><input type="number" className="inp" value={v.stat_years} onChange={num("stat_years")} /></Field>
+      </div>
+      <div className="flex items-center gap-3">
+        <button disabled={busy} onClick={save} className="btn-fill">Save stats</button>
+        {saved && <span className="text-sm text-accent">✓ Saved — refresh the homepage to see it</span>}
+      </div>
     </div>
   );
 }

@@ -12,53 +12,75 @@ function youtubeId(url?: string): string | null {
   return m ? m[1] : null;
 }
 
-/** Build an autoplaying, muted, looping preview embed for hover. Returns null
- *  if the URL can't be auto-previewed (we then fall back to thumbnail). */
-function previewEmbed(url?: string): string | null {
+/** Auto-playing, muted, looping preview embed (YouTube/Vimeo/Drive). */
+function previewEmbed(url: string | undefined, sound: boolean): string | null {
   if (!url) return null;
-  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
-  if (yt) return `https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&controls=0&loop=1&playlist=${yt[1]}&modestbranding=1&playsinline=1`;
+  const yt = youtubeId(url);
+  if (yt) return `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=${sound ? 0 : 1}&controls=0&loop=1&playlist=${yt}&modestbranding=1&playsinline=1&rel=0`;
   const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1&muted=1&loop=1&background=1`;
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1&muted=${sound ? 0 : 1}&loop=1&background=${sound ? 0 : 1}`;
   const drive = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
   if (drive) return `https://drive.google.com/file/d/${drive[1]}/preview`;
-  return null; // TikTok/Facebook don't reliably autoplay-on-hover; keep thumbnail
+  return null;
 }
 
-/** Direct video file? (mp4/webm/mov, e.g. uploaded to Cloudinary) */
 function isDirectVideo(url?: string): boolean {
   return !!url && (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(url) || url.includes("/video/upload/"));
 }
 
 const ASPECT: Record<string, string> = {
-  landscape: "aspect-video",      // 16:9
-  portrait: "aspect-[9/16]",       // 9:16
-  square: "aspect-square",         // 1:1
+  landscape: "aspect-video",
+  portrait: "aspect-[9/16]",
+  square: "aspect-square",
 };
 
 export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
   const aspect = ASPECT[p.orientation ?? "square"] ?? "aspect-square";
-  const [hover, setHover] = useState(false);
-  const [canHover, setCanHover] = useState(false);
-  const [tapPlay, setTapPlay] = useState(false); // mobile: tap the badge to preview
+  const ref = useRef<HTMLAnchorElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const embed = previewEmbed(p.video_url);
+  const [inView, setInView] = useState(false); // autoplay when scrolled into view
+  const [sound, setSound] = useState(false);    // tap to enable sound
   const direct = isDirectVideo(p.video_url);
+  const embed = previewEmbed(p.video_url, sound);
   const ytThumb = !p.thumbnail ? youtubeId(p.video_url) : null;
+  const playable = !!(direct || embed);
 
+  // autoplay (muted) only while the card is on screen — saves data, mirrors premium agency sites
   useEffect(() => {
-    // touch screens have no hover; don't mount iframes there (YouTube shows a bot check)
-    setCanHover(window.matchMedia("(hover: hover) and (pointer: fine)").matches);
-  }, []);
+    const el = ref.current;
+    if (!el || !playable) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        setInView(e.isIntersecting);
+        if (direct && videoRef.current) {
+          if (e.isIntersecting) videoRef.current.play().catch(() => {});
+          else { videoRef.current.pause(); setSound(false); }
+        }
+      },
+      { threshold: 0.5 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [direct, playable]);
+
+  function toggleSound(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = !sound;
+    setSound(next);
+    if (direct && videoRef.current) {
+      videoRef.current.muted = !next;
+      videoRef.current.play().catch(() => {});
+    }
+  }
 
   return (
     <Link
+      ref={ref}
       href={`/project/${p.slug}`}
-      onMouseEnter={() => { setHover(true); if (videoRef.current) { videoRef.current.currentTime = 0; videoRef.current.play().catch(() => {}); } }}
-      onMouseLeave={() => { setHover(false); videoRef.current?.pause(); }}
       className={`group relative block ${aspect} overflow-hidden rounded-[14px] shadow-2xl transition-transform duration-500 ease-apple hover:-translate-y-1.5`}
     >
-      {/* base layer: thumbnail or gradient */}
+      {/* base layer */}
       {p.thumbnail ? (
         <Image src={p.thumbnail} alt={p.title} fill sizes="(max-width:768px) 50vw, 25vw" className="object-cover transition-transform duration-700 ease-apple group-hover:scale-105" />
       ) : ytThumb ? (
@@ -68,51 +90,37 @@ export default function ProjectCard({ p }: { p: Project; vertical?: boolean }) {
         <div className="absolute inset-0 transition-transform duration-700 ease-apple group-hover:scale-105" style={{ background: grad(p.ci) }} />
       )}
 
-      {/* hover preview: direct video file */}
+      {/* direct video — autoplay muted while in view */}
       {direct && (
-        <video
-          ref={videoRef}
-          src={p.video_url}
-          muted loop playsInline preload="metadata"
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${hover || tapPlay ? "opacity-100" : "opacity-0"}`}
-        />
+        <video ref={videoRef} src={p.video_url} muted={!sound} loop playsInline preload="metadata"
+          className="absolute inset-0 h-full w-full object-cover" />
       )}
 
-      {/* hover preview: embeddable platforms (YouTube/Vimeo/Drive) — only mounts on hover to save data */}
-      {!direct && embed && ((hover && canHover) || tapPlay) && (
-        <iframe
-          src={embed}
-          className="absolute inset-0 h-full w-full"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          style={{ border: 0, pointerEvents: "none" }}
-          title={p.title}
-        />
+      {/* embedded platforms — mount while in view */}
+      {!direct && embed && inView && (
+        <iframe key={String(sound)} src={embed} className="absolute inset-0 h-full w-full"
+          allow="autoplay; encrypted-media; picture-in-picture" style={{ border: 0, pointerEvents: "none" }} title={p.title} />
       )}
 
       <div className="pointer-events-none absolute inset-0 ring-0 ring-accent transition-all duration-500 group-hover:ring-2" />
-      <div className={`pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-10 transition-opacity duration-300 ${(hover && canHover && (embed || direct)) || tapPlay ? "opacity-0" : "opacity-100"}`}>
+
+      {/* title — fades out once the preview is playing */}
+      <div className={`pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-10 transition-opacity duration-500 ${playable && inView ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
         <div className="h-display line-clamp-2 text-[13px] leading-snug text-white">{p.title}</div>
         <div className="mt-0.5 text-[11px] uppercase tracking-wider text-accent">{p.tags[0] ?? p.category}</div>
       </div>
 
-      {/* video badge — on touch devices it's a tap-to-preview button */}
-      {(embed || direct) && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const next = !tapPlay;
-            setTapPlay(next);
-            if (direct && videoRef.current) {
-              if (next) { videoRef.current.currentTime = 0; videoRef.current.muted = true; videoRef.current.play().catch(() => {}); }
-              else videoRef.current.pause();
-            }
-          }}
-          className={`absolute right-3 top-3 z-10 rounded-full px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-white transition-all duration-300 ${tapPlay ? "bg-accent" : "bg-black/60"} ${hover && !tapPlay ? "opacity-0" : "opacity-100"}`}
-          aria-label={tapPlay ? "Stop preview" : "Play preview"}
-        >
-          {tapPlay ? "✕ Close" : "▶ Preview"}
+      {/* sound toggle (clashivfx-style) — appears once preview is live */}
+      {playable && inView && (
+        <button type="button" onClick={toggleSound} aria-label={sound ? "Mute" : "Unmute"}
+          className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white backdrop-blur-md transition-all duration-300 hover:bg-accent">
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
+            {sound ? (
+              <><path d="M11 5 6 9H2v6h4l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18 6a9 9 0 0 1 0 12" /></>
+            ) : (
+              <><path d="M11 5 6 9H2v6h4l5 4z" /><path d="m22 9-6 6M16 9l6 6" /></>
+            )}
+          </svg>
         </button>
       )}
     </Link>
