@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import HeroShowcase from "./HeroShowcase";
 
 export default function Hero() {
   const t = useTranslations("hero");
@@ -13,7 +14,10 @@ export default function Hero() {
         <div className="absolute -left-[8vw] -top-[6vw] h-[55vw] w-[55vw] rounded-full bg-[radial-gradient(circle,#FF6B00,transparent_60%)] opacity-30 blur-3xl" />
         <div className="absolute -right-[6vw] top-[8vw] h-[46vw] w-[46vw] rounded-full bg-[radial-gradient(circle,#FF8A33,transparent_60%)] opacity-20 blur-3xl" />
       </div>
-      <div className="container-x pt-24">
+      <div className="container-x grid items-center gap-10 pt-28 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:pt-24">
+        {/* mobile: portrait above the text */}
+        <div className="lg:hidden"><HeroShowcase /></div>
+        <div>
         <motion.span className="eyebrow mb-7" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
           <span className="inline-block h-px w-9 bg-accent" />{t("roles")}
         </motion.span>
@@ -33,6 +37,9 @@ export default function Hero() {
           </Link>
           <Link href="/#contact" className="btn-ghost">{t("cta2")}</Link>
         </motion.div>
+        </div>
+        {/* desktop: portrait on the right */}
+        <div className="hidden lg:block"><HeroShowcase /></div>
       </div>
     </header>
   );
