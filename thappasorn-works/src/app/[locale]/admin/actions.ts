@@ -144,7 +144,7 @@ export async function deleteEnquiry(id: string) {
 }
 
 /* ---------------- Site settings (editable stats) ---------------- */
-export async function saveSettings(v: { stat_projects: number; stat_clients: number; stat_countries: number; stat_years: number; showreel_url?: string | null }) {
+export async function saveSettings(v: { stat_projects: number; stat_clients: number; stat_countries: number; stat_years: number; showreel_url?: string | null; owner_image?: string | null }) {
   const supabase = await requireOwner();
   const row = {
     id: 1,
@@ -153,6 +153,7 @@ export async function saveSettings(v: { stat_projects: number; stat_clients: num
     stat_countries: Number(v.stat_countries) || 0,
     stat_years: Number(v.stat_years) || 0,
     showreel_url: (v.showreel_url || "").trim() || null,
+    owner_image: (v.owner_image || "").trim() || null,
   };
   const { error } = await supabase.from("site_settings").upsert(row, { onConflict: "id" });
   if (error) throw new Error(error.message);

@@ -77,6 +77,7 @@ export interface SiteSettings {
   stat_countries: number;
   stat_years: number;
   showreel_url?: string | null;
+  owner_image?: string | null;
   hero?: HeroContent | null;
 }
 

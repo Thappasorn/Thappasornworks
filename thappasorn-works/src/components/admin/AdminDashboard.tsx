@@ -291,7 +291,14 @@ function StatsTab({ settings, busy, guard }: { settings: SiteSettings; busy: boo
   const [v, setV] = useState(settings);
   const [saved, setSaved] = useState(false);
   const num = (k: keyof SiteSettings) => (e: React.ChangeEvent<HTMLInputElement>) => { setV({ ...v, [k]: Number(e.target.value) }); setSaved(false); };
+  const [upBusy, setUpBusy] = useState(false);
   const save = guard(async () => { await saveSettings(v); setSaved(true); });
+  const uploadOwner = async (file: File) => {
+    setUpBusy(true);
+    try { const url = await uploadDirect(file); setV({ ...v, owner_image: url }); setSaved(false); }
+    catch (e) { alert(String(e)); }
+    finally { setUpBusy(false); }
+  };
   return (
     <div className="max-w-lg space-y-4">
       <p className="text-sm text-muted">These numbers show in the band under the hero. Edit and save — no code upload needed.</p>
@@ -303,6 +310,21 @@ function StatsTab({ settings, busy, guard }: { settings: SiteSettings; busy: boo
       </div>
       <Field label="Showreel video URL (YouTube/Vimeo/MP4) — plays behind the hero">
         <input className="inp" placeholder="https://youtu.be/... or .mp4 link" value={v.showreel_url ?? ""} onChange={(e) => { setV({ ...v, showreel_url: e.target.value }); setSaved(false); }} />
+      </Field>
+      <Field label="Owner photo (shown on the hero) — transparent PNG works best">
+        <div className="flex items-center gap-4">
+          <div className="grid h-20 w-16 flex-none place-items-center overflow-hidden rounded-lg border border-white/10 bg-white/[0.03]">
+            {v.owner_image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={v.owner_image} alt="owner" className="h-full w-full object-cover" />
+            ) : <span className="text-2xl text-muted">T</span>}
+          </div>
+          <div className="space-y-2">
+            <input type="file" accept="image/*" disabled={upBusy} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadOwner(f); }} />
+            {upBusy && <p className="text-xs text-muted">Uploading…</p>}
+            {v.owner_image && <button type="button" onClick={() => { setV({ ...v, owner_image: null }); setSaved(false); }} className="text-xs text-muted underline">Remove (back to “T”)</button>}
+          </div>
+        </div>
       </Field>
       <div className="flex items-center gap-3">
         <button disabled={busy} onClick={save} className="btn-fill">Save stats</button>

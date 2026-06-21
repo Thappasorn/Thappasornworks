@@ -6,7 +6,7 @@ import { Link } from "@/i18n/routing";
 import HeroShowcase from "./HeroShowcase";
 import HeroBackdrop from "./HeroBackdrop";
 
-export default function Hero({ showreelUrl, hero }: { showreelUrl?: string | null; hero?: HeroContent | null }) {
+export default function Hero({ showreelUrl, hero, ownerImage }: { showreelUrl?: string | null; hero?: HeroContent | null; ownerImage?: string | null }) {
   const t = useTranslations("hero");
   const locale = useLocale() as "en" | "th" | "cn" | "jp";
   const ov = hero?.[locale] ?? {};
@@ -26,7 +26,7 @@ export default function Hero({ showreelUrl, hero }: { showreelUrl?: string | nul
       </div>
       <div className="container-x grid items-center gap-10 pt-28 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:pt-24">
         {/* mobile: portrait above the text */}
-        <div className="lg:hidden"><HeroShowcase /></div>
+        <div className="lg:hidden"><HeroShowcase ownerImage={ownerImage} /></div>
         <div>
         <motion.span className="eyebrow mb-7" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
           <span className="inline-block h-px w-9 bg-accent" />{tx("roles")}
@@ -49,7 +49,7 @@ export default function Hero({ showreelUrl, hero }: { showreelUrl?: string | nul
         </motion.div>
         </div>
         {/* desktop: portrait on the right */}
-        <div className="hidden lg:block"><HeroShowcase /></div>
+        <div className="hidden lg:block"><HeroShowcase ownerImage={ownerImage} /></div>
       </div>
     </header>
   );

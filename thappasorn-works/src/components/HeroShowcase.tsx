@@ -14,7 +14,7 @@ const CARDS = [
   { label: "Content Creator", x: "-6%", y: "84%", delay: 1.6 },
 ];
 
-export default function HeroShowcase() {
+export default function HeroShowcase({ ownerImage }: { ownerImage?: string | null }) {
   const ref = useRef<HTMLDivElement>(null);
   const [imgOk, setImgOk] = useState(true);
 
@@ -60,7 +60,7 @@ export default function HeroShowcase() {
         {imgOk ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src="/owner.png"
+            src={ownerImage || "/owner.png"}
             alt="Thappasorn — creative director"
             onError={() => setImgOk(false)}
             className="absolute bottom-[-3%] left-1/2 h-[104%] w-auto max-w-none -translate-x-1/2 object-contain object-bottom [filter:drop-shadow(0_30px_60px_rgba(0,0,0,.55))_drop-shadow(0_0_42px_rgba(255,107,0,.28))]"
