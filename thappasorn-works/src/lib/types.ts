@@ -76,4 +76,13 @@ export interface SiteSettings {
   stat_countries: number;
   stat_years: number;
   showreel_url?: string | null;
+  hero?: HeroContent | null;
+}
+
+/** Per-language hero text. Each field optional — empty falls back to the translation file. */
+export interface HeroFields {
+  roles?: string; l1?: string; l2?: string; l3?: string; lead?: string; cta1?: string; cta2?: string;
+}
+export interface HeroContent {
+  en?: HeroFields; th?: HeroFields; cn?: HeroFields; jp?: HeroFields;
 }

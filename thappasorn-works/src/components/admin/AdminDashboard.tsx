@@ -6,9 +6,9 @@ import { createClient } from "@/lib/supabase/client";
 import {
   saveProject, deleteProject, toggleFeatured,
   saveReview, deleteReview, saveLogo, deleteLogo, exportTable,
-  markEnquiryRead, deleteEnquiry, saveSettings,
+  markEnquiryRead, deleteEnquiry, saveSettings, saveHero,
 } from "@/app/[locale]/admin/actions";
-import type { Project, Review, TrustedBy, Category, Enquiry, SiteSettings } from "@/lib/types";
+import type { Project, Review, TrustedBy, Category, Enquiry, SiteSettings, HeroContent, HeroFields } from "@/lib/types";
 import { trackDownload } from "@/lib/analytics";
 
 type Analytics = { visitors: number; views: number; line: number; email: number; phone: number; top: { title: string; slug: string; views: number }[] } | null;
@@ -38,7 +38,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
 }) {
   const t = useTranslations("admin");
   const router = useRouter();
-  const [tab, setTab] = useState<"analytics" | "projects" | "stats" | "reviews" | "logos" | "inbox" | "backup">("analytics");
+  const [tab, setTab] = useState<"analytics" | "projects" | "hero" | "stats" | "reviews" | "logos" | "inbox" | "backup">("analytics");
   const [busy, setBusy] = useState(false);
 
   const logout = async () => { if (configured) await createClient().auth.signOut(); router.replace("/admin/login"); };
@@ -57,7 +57,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
       {!configured && <p className="mt-4 rounded-xl border border-accent/30 bg-accent/10 p-3 text-sm text-accent">Demo mode — Supabase isn&apos;t configured. Add your keys (README) to enable uploads &amp; saving.</p>}
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {(["analytics", "projects", "stats", "reviews", "logos", "inbox", "backup"] as const).map((k) => (
+        {(["analytics", "projects", "hero", "stats", "reviews", "logos", "inbox", "backup"] as const).map((k) => (
           <button key={k} onClick={() => setTab(k)} className={`chip ${tab === k ? "chip-on" : ""}`}>{t(k)}</button>
         ))}
       </div>
@@ -82,6 +82,7 @@ export default function AdminDashboard({ configured, projects, reviews, trusted,
         {tab === "logos" && <LogosTab trusted={trusted} busy={busy} guard={guard} />}
         {tab === "inbox" && <InboxTab enquiries={enquiries} busy={busy} guard={guard} />}
         {tab === "stats" && <StatsTab settings={settings} busy={busy} guard={guard} />}
+        {tab === "hero" && <HeroTab settings={settings} busy={busy} guard={guard} />}
         {tab === "backup" && <BackupTab configured={configured} />}
       </div>
     </div>
@@ -229,6 +230,58 @@ function BulkAdd({ guard, busy }: { busy: boolean; guard: (fn: () => Promise<voi
           <p className="text-xs text-muted">Titles come from YouTube automatically (editable later). Images use their filename as the title.</p>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ---------------- Hero text (multilingual) ---------------- */
+const HERO_LANGS = [["en", "English"], ["th", "ไทย"], ["cn", "中文"], ["jp", "日本語"]] as const;
+const HERO_FIELDS: { k: keyof HeroFields; label: string }[] = [
+  { k: "roles", label: "Roles line (top, small caps)" },
+  { k: "l1", label: "Headline line 1" },
+  { k: "l2", label: "Headline line 2" },
+  { k: "l3", label: "Headline line 3" },
+  { k: "lead", label: "Description paragraph" },
+  { k: "cta1", label: "Button 1 (View My Work)" },
+  { k: "cta2", label: "Button 2 (Contact Me)" },
+];
+
+function HeroTab({ settings, busy, guard }: { settings: SiteSettings; busy: boolean; guard: (fn: () => Promise<void>) => () => void }) {
+  const [hero, setHero] = useState<HeroContent>(settings.hero ?? {});
+  const [lang, setLang] = useState<(typeof HERO_LANGS)[number][0]>("en");
+  const [saved, setSaved] = useState(false);
+  const cur = hero[lang] ?? {};
+  const set = (k: keyof HeroFields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setHero({ ...hero, [lang]: { ...cur, [k]: e.target.value } }); setSaved(false);
+  };
+  const save = guard(async () => { await saveHero(hero); setSaved(true); });
+
+  return (
+    <div className="max-w-2xl space-y-4">
+      <p className="text-sm text-muted">Edit the homepage hero text per language. Leave a field blank to keep the built-in default for that language.</p>
+      <div className="flex flex-wrap gap-2">
+        {HERO_LANGS.map(([code, name]) => (
+          <button key={code} onClick={() => setLang(code)}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${lang === code ? "bg-accent text-black" : "bg-white/5 text-muted hover:text-ink"}`}>
+            {name}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-3 rounded-xl border border-white/8 p-4">
+        {HERO_FIELDS.map(({ k, label }) => (
+          <Field key={k} label={label}>
+            {k === "lead" ? (
+              <textarea className="inp" rows={3} value={cur[k] ?? ""} onChange={set(k)} placeholder="(uses default if empty)" />
+            ) : (
+              <input className="inp" value={cur[k] ?? ""} onChange={set(k)} placeholder="(uses default if empty)" />
+            )}
+          </Field>
+        ))}
+      </div>
+      <div className="flex items-center gap-3">
+        <button disabled={busy} onClick={save} className="btn-fill">Save hero text</button>
+        {saved && <span className="text-sm text-accent">✓ Saved — refresh the homepage</span>}
+      </div>
     </div>
   );
 }

@@ -158,3 +158,11 @@ export async function saveSettings(v: { stat_projects: number; stat_clients: num
   if (error) throw new Error(error.message);
   revalidatePath("/", "layout");
 }
+
+/* ---------------- Hero content (multilingual) ---------------- */
+export async function saveHero(hero: import("@/lib/types").HeroContent) {
+  const supabase = await requireOwner();
+  const { error } = await supabase.from("site_settings").upsert({ id: 1, hero }, { onConflict: "id" });
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}
