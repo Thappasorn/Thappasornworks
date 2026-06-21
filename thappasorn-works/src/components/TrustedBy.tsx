@@ -4,10 +4,10 @@ import type { TrustedBy as TB } from "@/lib/types";
 
 function LogoCard({ l }: { l: TB }) {
   return (
-    <div className="mx-2 grid h-[88px] w-[200px] flex-none place-items-center overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-3 text-center font-[var(--font-display)] text-[15px] font-extrabold text-muted transition-all duration-300 ease-apple hover:border-accent hover:bg-accent/5 hover:text-ink">
+    <div className="mx-2 grid h-[88px] w-[200px] flex-none place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/95 p-4 text-center font-[var(--font-display)] text-[15px] font-extrabold text-[#0A0A0A] shadow-lg transition-all duration-300 ease-apple hover:border-accent hover:shadow-accent/20">
       {l.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={l.logo} alt={l.company_name} className="max-h-[64%] max-w-[82%] object-contain transition-transform duration-300 hover:scale-105" />
+        <img src={l.logo} alt={l.company_name} className="max-h-[70%] max-w-[85%] object-contain transition-transform duration-300 hover:scale-105" />
       ) : (
         l.company_name
       )}

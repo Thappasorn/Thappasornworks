@@ -53,12 +53,15 @@ section[id] { scroll-margin-top: 88px; }
 
 /* ===== Trusted-by logo marquee ===== */
 @keyframes marquee-left {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
 }
 .marquee-track {
-  animation: marquee-left 40s linear infinite;
+  animation: marquee-left 45s linear infinite;
   will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .marquee-track:hover { animation-play-state: paused; }
 .marquee-mask {
