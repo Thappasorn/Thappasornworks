@@ -7,7 +7,7 @@ function LogoCard({ l }: { l: TB }) {
     <div className="mx-2 grid h-[88px] w-[200px] flex-none place-items-center overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-3 text-center font-[var(--font-display)] text-[15px] font-extrabold text-muted transition-all duration-300 ease-apple hover:border-accent hover:bg-accent/5 hover:text-ink">
       {l.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={l.logo} alt={l.company_name} className="max-h-[64%] max-w-[82%] object-contain opacity-85 [filter:grayscale(1)_brightness(2)] transition-all duration-300 hover:opacity-100 hover:[filter:none]" />
+        <img src={l.logo} alt={l.company_name} className="max-h-[64%] max-w-[82%] object-contain transition-transform duration-300 hover:scale-105" />
       ) : (
         l.company_name
       )}
