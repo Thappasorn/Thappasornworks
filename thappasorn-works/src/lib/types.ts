@@ -32,6 +32,7 @@ export interface Project {
 export interface Review {
   id: string;
   client_name: string;
+  headline?: string;
   company?: string;
   position?: string;
   profile_image?: string;

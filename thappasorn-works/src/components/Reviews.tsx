@@ -35,7 +35,8 @@ export default function Reviews({ reviews, avg }: { reviews: Review[]; avg: stri
             <article key={r.id} className="card-glass flex min-h-[340px] w-[86%] shrink-0 snap-start flex-col p-7 transition-all duration-500 ease-apple hover:-translate-y-2 hover:shadow-glow sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
               {r.featured && <span className="mb-3 w-fit rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-bg">★ Featured</span>}
               <Stars n={r.rating} />
-              <p className="mt-4 flex-1 leading-relaxed text-ink/90">“{r.review_text}”</p>
+              {r.headline && <p className="mt-4 h-display text-[17px] leading-snug text-ink">{r.headline}</p>}
+              <p className={`${r.headline ? "mt-2" : "mt-4"} flex-1 leading-relaxed text-ink/90`}>“{r.review_text}”</p>
               {r.signature_image ? <img src={r.signature_image} alt="" className="my-3 h-11 w-auto opacity-90 [filter:brightness(0)_invert(1)]" /> : <div className="my-3 font-[Caveat] text-3xl text-accent">{r.client_name}</div>}
               <div className="mt-3 flex flex-wrap gap-2">
                 {r.project_type && <span className="rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-muted"><b className="text-accent">{r.project_type}</b></span>}

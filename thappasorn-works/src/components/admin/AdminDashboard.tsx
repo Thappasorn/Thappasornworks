@@ -352,6 +352,7 @@ function ReviewsTab({ reviews, busy, guard }: { reviews: Review[]; busy: boolean
         <Field label="Rating">
           <div className="text-2xl">{[1, 2, 3, 4, 5].map((n) => <span key={n} onClick={() => setF({ ...f, rating: n })} className={`cursor-pointer ${n <= (f.rating ?? 5) ? "text-accent" : "text-white/20"}`}>★</span>)}</div>
         </Field>
+        <Field label="Headline (short punch line)"><input className="inp" placeholder="e.g. Fast, beyond expectations!" value={f.headline ?? ""} onChange={(e) => setF({ ...f, headline: e.target.value })} /></Field>
         <Field label="Review text"><textarea className="inp" rows={3} value={f.review_text ?? ""} onChange={(e) => setF({ ...f, review_text: e.target.value })} /></Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Project type"><input className="inp" value={f.project_type ?? ""} onChange={(e) => setF({ ...f, project_type: e.target.value })} /></Field>
